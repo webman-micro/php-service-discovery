@@ -1,0 +1,19 @@
+{
+  "name": "webman-micro/php-service-discovery",
+  "type": "library",
+  "license": "MIT",
+  "description": "Webman plugin webman-micro/php-service-discovery",
+  "require": {
+    "php": ">=7.4",
+    "workerman/workerman": "^4.0.4 || ^5.0.0",
+    "illuminate/redis": "^10.48",
+    "ark/filecache": "*",
+    "ext-posix": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "WebmanMicro\\PhpServiceDiscovery\\": "src"
+    }
+  }
+}

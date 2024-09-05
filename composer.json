@@ -12,7 +12,6 @@
     "guzzlehttp/promises": "^1.5 | ^2.0",
     "guzzlehttp/guzzle": "^7.4",
     "monolog/monolog": "^2.8",
-    "ext-posix": "*",
     "ext-json": "*"
   },
   "autoload": {

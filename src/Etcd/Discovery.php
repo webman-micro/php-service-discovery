@@ -3,6 +3,9 @@
 namespace WebmanMicro\PhpServiceDiscovery\Etcd;
 
 use WebmanMicro\PhpServiceDiscovery\Cache\Client;
+use WebmanMicro\PhpServiceDiscovery\Cache\File;
+use WebmanMicro\PhpServiceDiscovery\LoadBalancer\LoadBalancerInterface;
+use WebmanMicro\PhpServiceDiscovery\LoadBalancer\RoundRobinBalancer;
 
 class Discovery
 {
@@ -14,6 +17,13 @@ class Discovery
 
     // cache key
     protected static $cacheKey = '';
+
+    /**
+     * 负载均衡器
+     * 默认为 RoundRobinBalancer
+     * @var LoadBalancerInterface
+     */
+    public $loadBalancer;
 
 
     // 注册参数
@@ -28,17 +38,19 @@ class Discovery
      */
     public function __construct()
     {
-        $uuid = Registry::$serverUUID;
-        if (!empty($uuid)) {
-            self::$cacheKey = "etcd_discovery" . $uuid;
-        } else {
-            // 从配置获取
-            $config = config('etcd', []);
-            if (!isset($config['discovery'])) {
-                throw new \RuntimeException("Etcd connection discovery not found");
-            }
-            self::$cacheKey = "etcd_discovery" . $config['discovery']["server_uuid"];
+        if (empty(self::$cacheKey)) {
+            self::$cacheKey = "etcd_discovery" . File::getServiceUUID();
+            $this->loadBalancer = $this->getDefaultLoadBalancer();
         }
+    }
+
+    /**
+     * Default LoadBalancer
+     * @return RoundRobinBalancer
+     */
+    protected function getDefaultLoadBalancer()
+    {
+        return new RoundRobinBalancer();
     }
 
     /**
@@ -56,26 +68,6 @@ class Discovery
     }
 
     /**
-     * 获取服务发现参数配置
-     * @param string $serverName
-     * @param int $serverPort
-     * @return array
-     */
-    public function generateParam(string $serverName = '', $serverPort = "8080"): array
-    {
-        // etcd 地址
-        $this->serverInfo['etcd_host'] = Registry::$serverEtcdHost;
-
-        $this->serverInfo['param'] = json_encode([
-            'uuid' => (string)Registry::$serverUUID,
-            'name' => (string)$serverName,
-            'port' => (string)$serverPort
-        ]);
-
-        return $this->serverInfo;
-    }
-
-    /**
      * 把服务地址写入缓存
      * @param $name
      * @param array $discoveryData
@@ -83,7 +75,6 @@ class Discovery
     public function refreshCache($name, $discoveryData = [])
     {
         $cache = Client::get(self::$cacheKey);
-
         if (empty($cache) && !isset($cache)) {
             $cacheArray = [];
         } else {
@@ -91,25 +82,25 @@ class Discovery
         }
 
         $cacheArray[$name] = $discoveryData;
-
         Client::set(self::$cacheKey, json_encode($cacheArray), 'EX', 5);
     }
 
     /**
      * 通过服务名称获取服务配置
      * @param $name
-     * @return array
+     * @return string
      */
     public function getServerConfigByName($name)
     {
         $cache = Client::get(self::$cacheKey);
 
+        //  负载均衡取节点
         if (!empty($cache)) {
             $cacheArray = json_decode($cache, true);
             if (array_key_exists($name, $cacheArray)) {
-                return $cacheArray[$name];
+                return $this->loadBalancer->invoke($cacheArray[$name]);
             }
         }
-        return [];
+        return '';
     }
 }

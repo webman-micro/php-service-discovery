@@ -203,7 +203,6 @@ class Client
             if (!isset($config)) {
                 throw new \RuntimeException("Redis connection $name not found");
             }
-
             static::$_manager = new RedisManager('', 'phpredis', $config);
         }
 

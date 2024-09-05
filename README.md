@@ -13,12 +13,6 @@ PHP版本，基于Workerman的ETCD服务注册和发现。 因为公司自身业
 - 支持 K8S service ip 自动获取，非K8S环境自动获取本地ip
 - 支持 熔断器
 
-# 安装
-
-```php
-composer require webman-micro/php-service-discovery
-```
-
 # 架构
 
 ![image](./service_discovery_structure.png)

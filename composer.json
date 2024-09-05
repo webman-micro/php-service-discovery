@@ -7,7 +7,11 @@
     "php": ">=7.4",
     "workerman/workerman": "^4.0.4 || ^5.0.0",
     "illuminate/redis": "^10.48",
-    "ark/filecache": "*",
+    "ark/filecache": "^0.1.0",
+    "webpatser/laravel-uuid": "^4.0",
+    "guzzlehttp/promises": "^1.5 | ^2.0",
+    "guzzlehttp/guzzle": "^7.4",
+    "monolog/monolog": "^2.8",
     "ext-posix": "*",
     "ext-json": "*"
   },

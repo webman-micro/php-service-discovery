@@ -2,8 +2,7 @@
 
 namespace WebmanMicro\PhpServiceDiscovery\Etcd;
 
-use WebmanMicro\PhpServiceDiscovery\Cache\Client;
-use WebmanMicro\PhpServiceDiscovery\Cache\File;
+use Workbunny\WebmanSharedCache\Cache;
 use WebmanMicro\PhpServiceDiscovery\LoadBalancer\LoadBalancerInterface;
 use WebmanMicro\PhpServiceDiscovery\LoadBalancer\RoundRobinBalancer;
 
@@ -39,9 +38,20 @@ class Discovery
     public function __construct()
     {
         if (empty(self::$cacheKey)) {
-            self::$cacheKey = "etcd_discovery" . File::getServiceUUID();
+            self::$cacheKey = "etcd_discovery" . $this->getServiceUUID();
             $this->loadBalancer = $this->getDefaultLoadBalancer();
         }
+    }
+
+    protected function getServiceUUID()
+    {
+        $uuid = Cache::Get('service_uuid');
+
+        if (empty($uuid)) {
+            $uuid = \Webpatser\Uuid\Uuid::generate()->string;
+            Cache::Set('service_uuid', (string)$uuid);
+        }
+        return $uuid;
     }
 
     /**
@@ -74,7 +84,7 @@ class Discovery
      */
     public function refreshCache($name, $discoveryData = [])
     {
-        $cache = Client::get(self::$cacheKey);
+        $cache = Cache::Get(self::$cacheKey);
         if (empty($cache) && !isset($cache)) {
             $cacheArray = [];
         } else {
@@ -82,7 +92,7 @@ class Discovery
         }
 
         $cacheArray[$name] = $discoveryData;
-        Client::set(self::$cacheKey, json_encode($cacheArray), 'EX', 5);
+        Cache::Set(self::$cacheKey, json_encode($cacheArray), ['EX' => 5]);
     }
 
     /**
@@ -92,7 +102,7 @@ class Discovery
      */
     public function getServerConfigByName($name)
     {
-        $cache = Client::get(self::$cacheKey);
+        $cache = Cache::Get(self::$cacheKey);
 
         //  负载均衡取节点
         if (!empty($cache)) {

@@ -2,7 +2,7 @@
 
 namespace WebmanMicro\PhpServiceDiscovery\Etcd;
 
-use WebmanMicro\PhpServiceDiscovery\Cache\File;
+use Workbunny\WebmanSharedCache\Cache;
 
 class Registry
 {
@@ -61,7 +61,7 @@ class Registry
         // 获取当前服务ip
         $this->serverInfo['server_host'] = $ip . ":" . (self::$serverConfig['server_port'] ?? '');
         $this->serverInfo['server_name'] = self::$serverConfig['server_name'] ?? '';
-        $this->serverInfo['server_id'] = File::getServiceUUID() ?? '';
+        $this->serverInfo['server_id'] = Cache::Get('service_uuid') ?? '';
 
         return $this->serverInfo;
     }

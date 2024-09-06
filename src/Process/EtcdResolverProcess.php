@@ -8,7 +8,7 @@ use Workerman\Http\Response;
 use WebmanMicro\PhpServiceDiscovery\Timer;
 use Workerman\Worker;
 use WebmanMicro\PhpServiceDiscovery\Traits\ErrorMsg;
-use WebmanMicro\PhpServiceDiscovery\Cache\File;
+use Workbunny\WebmanSharedCache\Cache;
 
 class EtcdResolverProcess extends AbstractProcess
 {
@@ -52,7 +52,7 @@ class EtcdResolverProcess extends AbstractProcess
     {
         if (is_int($this->timer_id)) {
             Timer::del($this->timer_id);
-            File::rmServiceUUID();
+            Cache::Del('service_uuid');
         }
     }
 

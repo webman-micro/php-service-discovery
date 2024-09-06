@@ -4,11 +4,11 @@ namespace WebmanMicro\PhpServiceDiscovery\Process;
 
 use support\Log;
 use WebmanMicro\PhpServiceDiscovery\Etcd\Registry;
+use Workbunny\WebmanSharedCache\Cache;
 use Workerman\Http\Response;
 use WebmanMicro\PhpServiceDiscovery\Timer;
 use Workerman\Worker;
 use WebmanMicro\PhpServiceDiscovery\Traits\ErrorMsg;
-use WebmanMicro\PhpServiceDiscovery\Cache\File;
 
 class EtcdRegistryProcess extends AbstractProcess
 {
@@ -64,7 +64,7 @@ class EtcdRegistryProcess extends AbstractProcess
      */
     protected function getDiscoveryName()
     {
-        $uuid = File::getServiceUUID();
+        $uuid = Cache::Get('service_uuid');
         return "discovery/{$this->etcd_config['server_name']}/{$uuid}";
     }
 
